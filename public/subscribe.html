@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Suscripción a WhatsApp Bible GPT</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f8f9fa;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        .subscription-container {
+            max-width: 700px;
+            margin: 50px auto;
+            padding: 30px;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .header h1 {
+            color: #4a6da7;
+            margin-bottom: 15px;
+        }
+        .plan-card {
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        .plan-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+        }
+        .plan-title {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #4a6da7;
+            margin-bottom: 10px;
+        }
+        .plan-price {
+            font-size: 2rem;
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+        .plan-features {
+            margin-bottom: 20px;
+        }
+        .btn-subscribe {
+            background-color: #4a6da7;
+            border: none;
+            padding: 10px 20px;
+            font-weight: bold;
+        }
+        .btn-subscribe:hover {
+            background-color: #3a5a8f;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container subscription-container">
+        <div class="header">
+            <h1>Suscríbete a WhatsApp Bible GPT</h1>
+            <p class="lead">Accede a conversaciones ilimitadas y funciones premium</p>
+        </div>
+
+        <div class="row mb-4">
+            <div class="col-md-6">
+                <div class="plan-card">
+                    <div class="plan-title">Plan Mensual</div>
+                    <div class="plan-price">$9.99 <small class="text-muted">/mes</small></div>
+                    <div class="plan-features">
+                        <ul>
+                            <li>Mensajes ilimitados</li>
+                            <li>Acceso a todas las funciones</li>
+                            <li>Soporte prioritario</li>
+                            <li>Facturación mensual</li>
+                        </ul>
+                    </div>
+                    <button class="btn btn-primary btn-subscribe w-100" data-plan-type="monthly">Suscribirse</button>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="plan-card">
+                    <div class="plan-title">Plan Anual</div>
+                    <div class="plan-price">$89.99 <small class="text-muted">/año</small></div>
+                    <div class="plan-features">
+                        <ul>
+                            <li>Mensajes ilimitados</li>
+                            <li>Acceso a todas las funciones</li>
+                            <li>Soporte prioritario</li>
+                            <li>Ahorra 25% comparado con el plan mensual</li>
+                        </ul>
+                    </div>
+                    <button class="btn btn-primary btn-subscribe w-100" data-plan-type="annual">Suscribirse</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="phone-form" style="display: none;">
+            <div class="form-group">
+                <label for="phone" class="form-label">Número de WhatsApp (con código de país)</label>
+                <input type="tel" class="form-control" id="phone" placeholder="+34612345678" required>
+                <div class="form-text">Ingresa tu número de WhatsApp con el código de país</div>
+            </div>
+            <button class="btn btn-primary btn-proceed w-100">Continuar al pago</button>
+            <button class="btn btn-link btn-back mt-2">Volver a los planes</button>
+        </div>
+
+        <div class="mt-4">
+            <p class="text-center text-muted">
+                Al suscribirte, aceptas nuestros <a href="#">Términos y Condiciones</a> y <a href="#">Política de Privacidad</a>.
+            </p>
+        </div>
+    </div>
+
+    <script src="https://js.stripe.com/v3/"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Variables
+            let selectedPlan = '';
+            const planCards = document.querySelector('.row');
+            const phoneForm = document.querySelector('.phone-form');
+            const btnProceed = document.querySelector('.btn-proceed');
+            const btnBack = document.querySelector('.btn-back');
+            const phoneInput = document.getElementById('phone');
+            const subscribeButtons = document.querySelectorAll('.btn-subscribe');
+
+            // Fetch Stripe publishable key
+            let stripePublishableKey = '';
+            fetch('/api/stripe-config')
+                .then(response => response.json())
+                .then(data => {
+                    stripePublishableKey = data.publishableKey;
+                })
+                .catch(error => {
+                    console.error('Error fetching Stripe config:', error);
+                });
+
+            // Event listeners for plan selection
+            subscribeButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    selectedPlan = this.getAttribute('data-plan-type');
+                    planCards.style.display = 'none';
+                    phoneForm.style.display = 'block';
+                });
+            });
+
+            // Back button
+            btnBack.addEventListener('click', function() {
+                phoneForm.style.display = 'none';
+                planCards.style.display = 'flex';
+            });
+
+            // Proceed to payment
+            btnProceed.addEventListener('click', function() {
+                const phone = phoneInput.value.trim();
+                if (!phone) {
+                    alert('Por favor ingresa tu número de teléfono');
+                    return;
+                }
+
+                // Create checkout session
+                fetch('/api/create-checkout-session', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        phone: phone,
+                        planType: selectedPlan
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.error) {
+                        alert(data.error);
+                        return;
+                    }
+                    
+                    // Initialize Stripe
+                    const stripe = Stripe(stripePublishableKey);
+                    
+                    // Redirect to Checkout
+                    stripe.redirectToCheckout({
+                        sessionId: data.sessionId
+                    }).then(function (result) {
+                        if (result.error) {
+                            alert(result.error.message);
+                        }
+                    });
+                })
+                .catch(error => {
+                    console.error('Error creating checkout session:', error);
+                    alert('Ha ocurrido un error. Por favor intenta nuevamente.');
+                });
+            });
+        });
+    </script>
+</body>
+</html>

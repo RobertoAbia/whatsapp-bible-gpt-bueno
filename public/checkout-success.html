@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>¡Suscripción Exitosa! - WhatsApp Bible GPT</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f8f9fa;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        .success-container {
+            max-width: 700px;
+            margin: 50px auto;
+            padding: 30px;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+        .success-icon {
+            font-size: 80px;
+            color: #28a745;
+            margin-bottom: 20px;
+        }
+        .success-title {
+            color: #4a6da7;
+            margin-bottom: 20px;
+        }
+        .btn-primary {
+            background-color: #4a6da7;
+            border: none;
+        }
+        .btn-primary:hover {
+            background-color: #3a5a8f;
+        }
+    </style>
+</head>
+<body>
+    <div class="container success-container">
+        <div class="success-icon">✓</div>
+        <h1 class="success-title">¡Suscripción Exitosa!</h1>
+        <p class="lead mb-4">Gracias por suscribirte a WhatsApp Bible GPT Premium.</p>
+        
+        <div class="card mb-4">
+            <div class="card-body">
+                <h5 class="card-title">Detalles de tu suscripción</h5>
+                <p>Tu suscripción ha sido activada correctamente. Ahora puedes disfrutar de todos los beneficios premium en WhatsApp Bible GPT.</p>
+                <p>Recibirás un mensaje de confirmación en tu WhatsApp con los detalles de tu suscripción.</p>
+            </div>
+        </div>
+        
+        <div class="mb-4">
+            <h5>¿Qué puedes hacer ahora?</h5>
+            <ul class="list-group list-group-flush text-start mb-4">
+                <li class="list-group-item">Envía mensajes ilimitados a WhatsApp Bible GPT</li>
+                <li class="list-group-item">Accede a todas las funciones premium</li>
+                <li class="list-group-item">Disfruta de respuestas más detalladas y precisas</li>
+                <li class="list-group-item">Recibe soporte prioritario</li>
+            </ul>
+        </div>
+        
+        <p>Para comenzar a usar tu suscripción, simplemente envía un mensaje a WhatsApp Bible GPT.</p>
+        
+        <div class="mt-4">
+            <a href="https://wa.me/+601285353065126" class="btn btn-primary btn-lg">Ir a WhatsApp</a>
+        </div>
+        
+        <div class="mt-4 text-muted">
+            <p>Si tienes alguna pregunta o necesitas ayuda, no dudes en contactarnos.</p>
+            <p>Gracias por confiar en WhatsApp Bible GPT.</p>
+        </div>
+    </div>
+
+    <script>
+        // Opcional: Puedes agregar código JavaScript para obtener y mostrar detalles específicos de la suscripción
+        document.addEventListener('DOMContentLoaded', function() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const sessionId = urlParams.get('session_id');
+            
+            if (sessionId) {
+                console.log('Session ID:', sessionId);
+                // Aquí podrías hacer una llamada a tu API para obtener detalles de la sesión si lo necesitas
+            }
+        });
+    </script>
+</body>
+</html>

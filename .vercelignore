@@ -1,0 +1,16 @@
+# Archivos de prueba
+test-*.js
+
+# Archivos de desarrollo local
+vercel-local.js
+
+# Logs
+*.log
+logs/
+server_logs.txt
+
+# Archivos SQL (no necesarios para el despliegue)
+*.sql
+
+# Otros archivos no necesarios en producción
+README.md

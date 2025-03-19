@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Suscripción Premium</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <script src="https://js.stripe.com/v3/"></script>
+    <style>
+        :root {
+            --primary-color: #128c7e;
+            --secondary-color: #075e54;
+            --accent-color: #25d366;
+            --text-color: #333;
+            --light-gray: #f5f5f5;
+            --white: #ffffff;
+            --box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            --border-radius: 8px;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: var(--light-gray);
+            color: var(--text-color);
+            line-height: 1.6;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            flex: 1;
+        }
+        
+        header {
+            background-color: var(--primary-color);
+            color: var(--white);
+            padding: 20px 0;
+            text-align: center;
+            box-shadow: var(--box-shadow);
+        }
+        
+        header h1 {
+            font-size: 28px;
+            margin-bottom: 5px;
+        }
+        
+        .checkout-container {
+            background-color: var(--white);
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            padding: 30px;
+            margin-top: 30px;
+        }
+        
+        .plan-details {
+            margin-bottom: 30px;
+            text-align: center;
+        }
+        
+        .plan-name {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--primary-color);
+            margin-bottom: 10px;
+        }
+        
+        .plan-price {
+            font-size: 36px;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+        
+        .plan-price small {
+            font-size: 16px;
+            font-weight: 400;
+        }
+        
+        .plan-features {
+            list-style: none;
+            margin: 20px 0;
+        }
+        
+        .plan-features li {
+            padding: 8px 0;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .plan-features li:last-child {
+            border-bottom: none;
+        }
+        
+        .plan-features li::before {
+            content: "✓";
+            color: var(--accent-color);
+            margin-right: 10px;
+            font-weight: bold;
+        }
+        
+        #checkout-button {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            font-size: 16px;
+            font-weight: 500;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            width: 100%;
+            transition: background-color 0.3s;
+        }
+        
+        #checkout-button:hover {
+            background-color: var(--secondary-color);
+        }
+        
+        .loading {
+            display: none;
+            text-align: center;
+            margin-top: 20px;
+        }
+        
+        .loading-spinner {
+            border: 4px solid rgba(0, 0, 0, 0.1);
+            border-left-color: var(--primary-color);
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 10px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        footer {
+            background-color: var(--primary-color);
+            color: var(--white);
+            text-align: center;
+            padding: 15px 0;
+            margin-top: 40px;
+            font-size: 14px;
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                padding: 15px;
+            }
+            
+            .checkout-container {
+                padding: 20px;
+            }
+            
+            header h1 {
+                font-size: 24px;
+            }
+            
+            .plan-name {
+                font-size: 20px;
+            }
+            
+            .plan-price {
+                font-size: 30px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Suscripción Premium</h1>
+        <p>Desbloquea conversaciones ilimitadas</p>
+    </header>
+    
+    <div class="container">
+        <div class="checkout-container">
+            <div class="plan-details">
+                <div class="plan-name">Plan Premium</div>
+                <div class="plan-price">5,99€ <small>/mes</small></div>
+                <p>Acceso completo a todas las funciones</p>
+                
+                <ul class="plan-features">
+                    <li>Mensajes ilimitados</li>
+                    <li>Respuestas personalizadas</li>
+                    <li>Conversaciones más profundas</li>
+                    <li>Soporte prioritario</li>
+                    <li>Cancela cuando quieras</li>
+                </ul>
+            </div>
+            
+            <button id="checkout-button">Completar Suscripción</button>
+            
+            <div class="loading" id="loading">
+                <div class="loading-spinner"></div>
+                <p>Preparando el pago...</p>
+            </div>
+        </div>
+    </div>
+    
+    <footer>
+        &copy; 2025 BibleGPT - Todos los derechos reservados
+    </footer>
+    
+    <script>
+        // Obtener el ID de sesión de la URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const sessionId = urlParams.get('session_id');
+        
+        if (!sessionId) {
+            alert('Error: No se encontró el ID de sesión');
+        }
+        
+        // Inicializar Stripe con la clave pública obtenida del servidor
+        let stripe;
+        
+        // Obtener la clave pública de Stripe desde el servidor
+        fetch('/api/stripe-config')
+            .then(response => response.json())
+            .then(config => {
+                stripe = Stripe(config.publishableKey);
+            })
+            .catch(error => {
+                console.error('Error al obtener la configuración de Stripe:', error);
+                alert('Error al cargar la configuración de pago. Por favor, inténtalo de nuevo más tarde.');
+            });
+        
+        // Configurar el botón de checkout
+        const checkoutButton = document.getElementById('checkout-button');
+        const loadingElement = document.getElementById('loading');
+        
+        checkoutButton.addEventListener('click', function() {
+            if (!stripe) {
+                alert('El sistema de pago aún no está listo. Por favor, espera unos segundos e inténtalo de nuevo.');
+                return;
+            }
+            
+            // Mostrar indicador de carga
+            checkoutButton.style.display = 'none';
+            loadingElement.style.display = 'block';
+            
+            // Redirigir a Checkout
+            stripe.redirectToCheckout({
+                sessionId: sessionId
+            }).then(function(result) {
+                // Si hay un error, mostrar mensaje
+                if (result.error) {
+                    alert(result.error.message);
+                    checkoutButton.style.display = 'block';
+                    loadingElement.style.display = 'none';
+                }
+            });
+        });
+    </script>
+</body>
+</html>
