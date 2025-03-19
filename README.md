@@ -47,11 +47,11 @@ La aplicación utiliza un sistema de URLs dinámicas para facilitar el desarroll
 
 1. `BASE_URL`: Esta variable define la URL base de la aplicación.
    - En desarrollo local: `http://localhost:3000`
-   - En producción: `https://biblia.releasemvps.com` o la URL de tu despliegue en Vercel
+   - En producción: `https://whatsapp-bible-gpt-bueno-production.up.railway.app` o la URL de tu despliegue en Railway
 
 2. `WEBHOOK_URL`: Esta variable define la URL del webhook para WhatsApp.
    - En desarrollo local: `http://localhost:3000/webhook`
-   - En producción: `https://biblia.releasemvps.com/webhook` o la URL correspondiente
+   - En producción: `https://whatsapp-bible-gpt-bueno-production.up.railway.app/webhook` o la URL correspondiente
 
 El script `vercel-local.js` configura automáticamente estas variables para el entorno de desarrollo local.
 
@@ -126,44 +126,42 @@ Explícame el significado del Salmo 23
 - `.env.example`: Ejemplo de las variables de entorno necesarias
 - `supabase_optimizado.sql`: Script SQL para configurar la base de datos
 - `package.json`: Dependencias y scripts del proyecto
-- `vercel.json`: Configuración para el despliegue en Vercel
+- `vercel.json`: Configuración para el despliegue (compatible con Railway)
 
-## Despliegue en Vercel
+## Despliegue en Railway
 
-Para desplegar esta aplicación en Vercel, sigue estos pasos:
+Para desplegar esta aplicación en Railway, sigue estos pasos:
 
-1. **Crea una cuenta en Vercel**: Regístrate en [Vercel](https://vercel.com) si aún no tienes una cuenta.
+1. **Crea una cuenta en Railway**: Regístrate en [Railway](https://railway.app) si aún no tienes una cuenta.
 
-2. **Instala la CLI de Vercel** (opcional):
-   ```bash
-   npm i -g vercel
-   ```
-
-3. **Conecta tu repositorio**:
-   - Sube tu código a GitHub, GitLab o Bitbucket
-   - En el dashboard de Vercel, haz clic en "New Project"
+2. **Conecta tu repositorio**:
+   - Sube tu código a GitHub
+   - En el dashboard de Railway, haz clic en "New Project"
+   - Selecciona "Deploy from GitHub repo"
    - Selecciona tu repositorio
-   - Vercel detectará automáticamente que es un proyecto Node.js
+   - Railway detectará automáticamente que es un proyecto Node.js
 
-4. **Configura las variables de entorno**:
-   - En la configuración del proyecto en Vercel, añade todas las variables de entorno que están en tu archivo `.env`
+3. **Configura las variables de entorno**:
+   - En la configuración del proyecto en Railway, añade todas las variables de entorno que están en tu archivo `.env`
    - Asegúrate de incluir todas las claves de API y configuraciones necesarias
 
-5. **Configura los webhooks**:
-   - Una vez desplegada la aplicación, obtendrás una URL (ej: `https://tu-app.vercel.app`)
-   - Actualiza la configuración de webhook de WhatsApp con esta URL: `https://tu-app.vercel.app/webhook`
-   - Actualiza la configuración de webhook de Stripe con esta URL: `https://tu-app.vercel.app/webhook`
+4. **Configura los webhooks**:
+   - Una vez desplegada la aplicación, obtendrás una URL (ej: `https://tu-app-production.up.railway.app`)
+   - Actualiza la configuración de webhook de WhatsApp con esta URL: `https://tu-app-production.up.railway.app/webhook`
+   - Actualiza la configuración de webhook de Stripe con esta URL: `https://tu-app-production.up.railway.app/webhook`
 
-6. **Verifica el despliegue**:
+5. **Verifica el despliegue**:
    - Envía un mensaje de prueba a tu número de WhatsApp Business
-   - Verifica los logs en el dashboard de Vercel para asegurarte de que todo funciona correctamente
+   - Verifica los logs en el dashboard de Railway para asegurarte de que todo funciona correctamente
 
-### Consideraciones importantes para Vercel
+### Consideraciones importantes para Railway
 
-- **Serverless Functions**: Vercel utiliza funciones serverless, lo que significa que tu aplicación se ejecutará en un entorno sin estado. Asegúrate de que tu código no dependa de almacenamiento local.
+- **Servidor persistente**: A diferencia de Vercel, Railway proporciona un servidor persistente, lo que significa que tu aplicación se ejecutará en un entorno con estado. Esto es ideal para aplicaciones que necesitan mantener conexiones persistentes o procesar solicitudes de larga duración.
 
-- **Límites de tiempo**: Las funciones serverless tienen un límite de tiempo de ejecución (generalmente 10-60 segundos). Si tu aplicación necesita procesar solicitudes más largas, considera usar un servicio diferente.
+- **Sin límites de tiempo estrictos**: Railway no impone límites de tiempo de ejecución tan estrictos como las funciones serverless, lo que es perfecto para aplicaciones que necesitan procesar solicitudes más largas o mantener conexiones abiertas.
 
-- **Escalado automático**: Vercel escala automáticamente tu aplicación según la demanda, lo que es ideal para manejar picos de tráfico.
+- **Escalado manual o automático**: Railway permite configurar el escalado de tu aplicación según tus necesidades.
 
-- **Dominio personalizado**: Puedes configurar un dominio personalizado para tu aplicación en la configuración del proyecto en Vercel.
+- **Dominio personalizado**: Puedes configurar un dominio personalizado para tu aplicación en la configuración del proyecto en Railway.
+
+> **Nota**: Este proyecto se despliega en Railway en lugar de Vercel debido a que requiere un servidor persistente y no es adecuado para un entorno serverless, que tiene limitaciones de tiempo de ejecución y estado.
