@@ -28,6 +28,10 @@ const logger = winston.createLogger({
     ]
 });
 
+// Depuración de variables de entorno
+console.log('SUPABASE_URL:', process.env.SUPABASE_URL);
+console.log('SUPABASE_KEY length:', process.env.SUPABASE_KEY ? process.env.SUPABASE_KEY.length : 0);
+
 // Inicialización de clientes y configuraciones
 const app = express();
 const PORT = process.env.PORT || 3000;
