@@ -37,9 +37,22 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 // Configuración de Supabase
-const supabaseUrl = process.env.SUPABASE_URL;
-const supabaseKey = process.env.SUPABASE_KEY;
-const supabase = createClient(supabaseUrl, supabaseKey);
+let supabase;
+try {
+    const supabaseUrl = process.env.SUPABASE_URL;
+    const supabaseKey = process.env.SUPABASE_KEY;
+    
+    if (!supabaseUrl) {
+        console.error('Error: SUPABASE_URL no está definido');
+    } else if (!supabaseKey) {
+        console.error('Error: SUPABASE_KEY no está definido');
+    } else {
+        console.log('Inicializando Supabase con URL:', supabaseUrl);
+        supabase = createClient(supabaseUrl, supabaseKey);
+    }
+} catch (error) {
+    console.error('Error al inicializar Supabase:', error);
+}
 
 // Configuración de OpenAI
 const openai = new OpenAI({
