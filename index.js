@@ -434,7 +434,7 @@ async function updateConversationContext(phoneNumber, userMessage, aiResponse, e
         
         // Generar contexto con OpenAI
         const completion = await openai.chat.completions.create({
-            model: "gpt-4",
+            model: "gpt-4o-mini",
             messages: messages,
             temperature: 0.3
         });
@@ -508,7 +508,7 @@ async function generateConversationSummary(phoneNumber, history) {
         
         // Generar resumen con OpenAI
         const completion = await openai.chat.completions.create({
-            model: "gpt-4",
+            model: "gpt-4o-mini",
             messages: messages,
             temperature: 0.5,
         });
@@ -585,7 +585,7 @@ ${summary}`
         
         // Obtener respuesta de OpenAI
         const completion = await openai.chat.completions.create({
-            model: "gpt-4",
+            model: "gpt-4o-mini",
             messages: messages,
             temperature: 0.7,
         });
