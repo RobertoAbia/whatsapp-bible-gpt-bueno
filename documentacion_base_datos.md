@@ -21,25 +21,25 @@ Almacena información sobre los usuarios del sistema.
 | `messages_count` | integer | Contador de mensajes enviados por el usuario |
 | `created_at` | timestamptz | Fecha de creación del registro |
 | `updated_at` | timestamptz | Fecha de última actualización del registro |
+| `conversation_context` | jsonb | Contexto de la conversación actual |
+| `conversation_history` | text | Historial de conversaciones en formato JSON |
+| `conversation_summary` | text | Resumen de la conversación actual |
 | `stripe_customer_id` | text | ID del cliente en Stripe |
 | `stripe_subscription_id` | text | ID de la suscripción en Stripe |
-| `conversation_summary` | text | Resumen de la conversación actual |
-| `conversation_context` | json | Contexto de la conversación en formato JSON |
-| `conversation_history` | json | Historial de la conversación en formato JSON |
+| `subscription_plan` | text | Tipo de plan ('mensual', 'anual') |
 
 ### Tabla `messages`
 
-Almacena los mensajes intercambiados entre usuarios y el sistema.
+Almacena los mensajes enviados por los usuarios.
 
 | Campo | Tipo | Descripción |
 |-------|------|-------------|
-| `id` | bigint | Identificador único del mensaje (clave primaria) |
-| `user_id` | uuid | Referencia al usuario que envió el mensaje |
-| `question` | text | Pregunta o mensaje enviado por el usuario |
+| `id` | uuid | Identificador único del mensaje (clave primaria) |
+| `user_id` | uuid | ID del usuario que envió el mensaje (clave foránea) |
+| `content` | text | Contenido del mensaje |
 | `response` | text | Respuesta generada por el sistema |
-| `is_paid` | boolean | Indica si el mensaje fue enviado durante una suscripción pagada |
-| `tokens_used` | integer | Número de tokens utilizados en la generación de la respuesta |
 | `created_at` | timestamptz | Fecha de creación del mensaje |
+| `updated_at` | timestamptz | Fecha de última actualización del mensaje |
 
 ## Relaciones
 
@@ -62,6 +62,46 @@ El campo `subscription_status` en la tabla `users` puede tener los siguientes va
 - **'pending'**: Usuario ha solicitado pago pero aún no lo ha completado
 - **'paid'**: Usuario ha pagado y tiene acceso completo
 - **'cancelled'**: Usuario ha cancelado su suscripción
+
+## Flujos de Datos
+
+### Creación de Usuarios Nuevos
+
+Cuando un usuario interactúa por primera vez con el sistema, se sigue el siguiente flujo:
+
+1. Se recibe un mensaje de WhatsApp con el número de teléfono del usuario.
+2. Se verifica si el usuario existe en la base de datos.
+3. Si no existe, se crea automáticamente un nuevo registro con:
+   - `phone_number`: Número de teléfono del usuario
+   - `messages_count`: 0
+   - `subscription_status`: 'free'
+   - `created_at`: Fecha y hora actual
+4. El usuario puede comenzar a enviar mensajes inmediatamente, con un límite de 15 mensajes gratuitos.
+
+### Flujo de Suscripciones y Pagos
+
+El sistema utiliza Stripe para gestionar suscripciones y pagos:
+
+1. **Inicio del proceso de pago**:
+   - Cuando un usuario alcanza su límite de mensajes gratuitos, se le ofrece la opción de suscribirse.
+   - Se genera un enlace de pago de Stripe y se envía al usuario.
+
+2. **Proceso de pago completado**:
+   - Stripe envía un webhook `checkout.session.completed` a la URL configurada.
+   - El sistema verifica la autenticidad del webhook usando `STRIPE_WEBHOOK_SECRET`.
+   - Si el usuario no existe en la base de datos (caso poco común), se crea automáticamente.
+   - Se actualiza el estado del usuario a `subscription_status: 'paid'`.
+   - Se establece la fecha de finalización de la suscripción según el plan (mensual o anual).
+   - Se almacenan los IDs de cliente y suscripción de Stripe.
+
+3. **Renovación de suscripción**:
+   - Stripe envía un webhook `invoice.paid` cuando se procesa un pago recurrente.
+   - El sistema actualiza la fecha de finalización de la suscripción.
+
+4. **Cancelación de suscripción**:
+   - Stripe envía un webhook `customer.subscription.deleted` cuando se cancela una suscripción.
+   - El sistema actualiza el estado del usuario a `subscription_status: 'cancelled'`.
+   - El usuario puede seguir usando el servicio hasta la fecha de finalización de su suscripción.
 
 ## Triggers y Funciones Automáticas
 
@@ -92,20 +132,6 @@ Crea un nuevo usuario con el número de teléfono especificado.
 
 ### `get_raw_message_count(phone_param TEXT)`
 Obtiene el contador de mensajes raw directamente de la base de datos, junto con información adicional sobre el tipo de dato.
-
-## Flujo de Suscripción y Pagos
-
-1. **Registro inicial**: Cuando un usuario nuevo envía un mensaje, se crea un registro en la tabla `users` con `subscription_status = 'free'`.
-
-2. **Período gratuito**: El usuario puede enviar hasta 15 mensajes gratuitos.
-
-3. **Notificación de límite**: Al llegar al mensaje número 14, el sistema notifica al usuario que le queda un mensaje gratuito.
-
-4. **Solicitud de pago**: Al alcanzar el límite, se envía un enlace de pago y se actualiza el estado a `subscription_status = 'pending'`.
-
-5. **Pago completado**: Cuando el usuario completa el pago, se actualiza a `subscription_status = 'paid'` y se establece `subscription_end_date`.
-
-6. **Cancelación**: Si el usuario cancela su suscripción, se actualiza a `subscription_status = 'cancelled'`.
 
 ## Notas Importantes
 

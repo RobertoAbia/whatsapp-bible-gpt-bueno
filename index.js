@@ -159,7 +159,7 @@ async function getOrCreateUser(phoneNumber) {
             .from('users')
             .select('*')
             .eq('phone_number', phoneNumber)
-            .single();
+            .maybeSingle();
             
         // Si hay un error que no sea "no se encontró registro"
         if (fetchError && fetchError.code !== 'PGRST116') {
@@ -223,11 +223,39 @@ async function checkMessageLimit(phoneNumber) {
             .from('users')
             .select('*')
             .eq('phone_number', phoneNumber)
-            .single();
+            .maybeSingle();
             
         if (fetchError) {
             logger.error(`Error obteniendo datos del usuario: ${fetchError.message}`);
             return { error: true, message: "Error obteniendo datos del usuario" };
+        }
+        
+        // Si el usuario no existe, crearlo
+        if (!userData) {
+            logger.info(`No se encontró usuario con número de teléfono ${phoneNumber}, creando nuevo usuario`);
+            
+            // Crear nuevo usuario
+            const { data: newUser, error: createError } = await supabase
+                .from('users')
+                .insert([{
+                    phone_number: phoneNumber,
+                    messages_count: 0,
+                    subscription_status: 'free',
+                    created_at: new Date().toISOString()
+                }])
+                .select();
+                
+            if (createError || !newUser || newUser.length === 0) {
+                logger.error('Error creando nuevo usuario:', createError);
+                return { error: true, message: "Error creando nuevo usuario" };
+            }
+            
+            // Retornar que el usuario puede enviar mensajes (es nuevo)
+            return { 
+                can_send: true, 
+                is_free: true, 
+                messages_count: 0 
+            };
         }
         
         // Verificar si el usuario tiene suscripción activa
@@ -1104,7 +1132,7 @@ async function handleCheckoutCompleted(session) {
             .from('users')
             .select('*')
             .eq('phone_number', phoneNumber)
-            .single();
+            .maybeSingle();
             
         let userId;
         
@@ -1117,7 +1145,7 @@ async function handleCheckoutCompleted(session) {
                 .insert([{
                     phone_number: phoneNumber,
                     messages_count: 0,
-                    subscription_status: 'pending',
+                    subscription_status: 'free',
                     created_at: new Date().toISOString()
                 }])
                 .select();
