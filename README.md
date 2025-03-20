@@ -66,6 +66,13 @@ El script `vercel-local.js` configura automáticamente estas variables para el e
    - Funciones y triggers necesarios para la gestión de mensajes
    - Políticas de seguridad (RLS) para permitir operaciones desde la aplicación
 
+Para una documentación detallada sobre la estructura y funcionamiento de la base de datos, consulta el archivo [documentacion_base_datos.md](./documentacion_base_datos.md). Este documento incluye:
+- Estructura completa de las tablas
+- Estados de suscripción y su significado
+- Triggers y funciones automáticas
+- Flujo de suscripción y pagos
+- Índices y optimizaciones
+
 ## Configuración de WhatsApp Business API
 
 1. Crea una cuenta de desarrollador en Meta (https://developers.facebook.com)
